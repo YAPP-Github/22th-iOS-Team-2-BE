@@ -25,6 +25,8 @@ class AuthServiceTest {
 
     @Autowired
     private AuthService authService;
+    @Autowired
+    private MemberService memberService;
 
     private String email;
     private OAuthType oAuthType;
@@ -100,7 +102,7 @@ class AuthServiceTest {
         Long memberId = savedMember.getId();
 
         // when
-        MemberInfoResponseDto memberInfoResponseDto = authService.getMemberInfo(memberId);
+        MemberInfoResponseDto memberInfoResponseDto = memberService.getMemberInfo(memberId);
 
         // then
         Assertions.assertAll(
@@ -118,7 +120,7 @@ class AuthServiceTest {
         Member savedMember = memberRepository.save(member);
         Long memberId = savedMember.getId();
         String updatedNickname = "새로운 닉네임";
-        authService.updateNickname(memberId, new NicknameRequestDto(updatedNickname));
+        memberService.updateNickname(memberId, new NicknameRequestDto(updatedNickname));
 
         // when
         Member findMember = memberRepository.getReferenceById(memberId);

@@ -1,7 +1,10 @@
 package com.pyonsnalcolor.member.service;
 
+import com.pyonsnalcolor.exception.PyonsnalcolorAuthException;
 import com.pyonsnalcolor.exception.PyonsnalcolorProductException;
 import com.pyonsnalcolor.member.dto.FavoriteRequestDto;
+import com.pyonsnalcolor.member.dto.MemberInfoResponseDto;
+import com.pyonsnalcolor.member.dto.NicknameRequestDto;
 import com.pyonsnalcolor.member.entity.Favorite;
 import com.pyonsnalcolor.member.entity.Member;
 import com.pyonsnalcolor.member.repository.FavoriteRepository;
@@ -20,6 +23,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.pyonsnalcolor.exception.model.AuthErrorCode.NICKNAME_ALREADY_EXIST;
+import static com.pyonsnalcolor.exception.model.AuthErrorCode.REFRESH_TOKEN_MISMATCH;
 import static com.pyonsnalcolor.exception.model.CommonErrorCode.*;
 
 @Slf4j
@@ -30,6 +35,27 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final FavoriteRepository favoriteRepository;
     private final ProductFactory productFactory;
+
+    public MemberInfoResponseDto getMemberInfo(Long memberId) {
+        Member member = memberRepository.getReferenceById(memberId);
+        return new MemberInfoResponseDto(member);
+    }
+
+    public void updateNickname(Long memberId, NicknameRequestDto nicknameRequestDto
+    ) {
+        Member member = memberRepository.getReferenceById(memberId);
+        String updatedNickname = nicknameRequestDto.getNickname();
+        if (checkIfNicknameIsDuplicate(updatedNickname)) {
+            throw new PyonsnalcolorAuthException(NICKNAME_ALREADY_EXIST);
+        }
+
+        member.updateNickname(updatedNickname);
+        memberRepository.save(member);
+    }
+
+    private boolean checkIfNicknameIsDuplicate(String nickname) {
+       return memberRepository.findByNickname(nickname).isPresent();
+    }
 
     public Slice<String> getProductIdsOfFavorite(Pageable pageable, Long memberId, ProductType productType) {
         return favoriteRepository.getFavoriteByMemberIdAndProductType(pageable, memberId, productType)

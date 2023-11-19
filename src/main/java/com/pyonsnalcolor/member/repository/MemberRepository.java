@@ -17,4 +17,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<String> findRefreshTokenByoAuthId(@Param("oAuthId") String oAuthId);
 
     Optional<Member> findByRefreshToken(String refreshToken);
+
+    Optional<String> findByNickname(String nickname);
 }

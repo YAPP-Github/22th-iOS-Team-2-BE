@@ -159,22 +159,6 @@ public class AuthService {
                 .forEach(pushProductStoreRepository::delete);
     }
 
-    public MemberInfoResponseDto getMemberInfo(Long memberId) {
-        Member member = memberRepository.getReferenceById(memberId);
-        return new MemberInfoResponseDto(member);
-    }
-
-    public void updateNickname(
-            Long memberId,
-            NicknameRequestDto nicknameRequestDto
-    ) {
-        Member member = memberRepository.getReferenceById(memberId);
-        String updatedNickname = nicknameRequestDto.getNickname();
-
-        member.updateNickname(updatedNickname);
-        memberRepository.save(member);
-    }
-
     public void logout(TokenDto tokenDto) {
         String bearerToken = tokenDto.getAccessToken();
         String accessToken = jwtTokenProvider.resolveBearerToken(bearerToken);

@@ -5,6 +5,7 @@ import com.pyonsnalcolor.member.dto.MemberInfoResponseDto;
 import com.pyonsnalcolor.member.dto.NicknameRequestDto;
 import com.pyonsnalcolor.member.dto.TokenDto;
 import com.pyonsnalcolor.member.service.AuthService;
+import com.pyonsnalcolor.member.service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,6 +23,7 @@ import javax.validation.Valid;
 public class MemberController {
 
     private final AuthService authService;
+    private final MemberService memberService;
 
     @Operation(summary = "로그아웃", description = "사용자의 JWT 토큰을 무효화합니다.")
     @Parameter(name = "tokenDto", description = "JWT 로그인 토큰")
@@ -36,7 +38,7 @@ public class MemberController {
     public ResponseEntity<MemberInfoResponseDto> getMemberInfo(
             @Parameter(hidden = true) @AuthMemberId Long memberId
     ) {
-        MemberInfoResponseDto memberInfoResponseDto = authService.getMemberInfo(memberId);
+        MemberInfoResponseDto memberInfoResponseDto = memberService.getMemberInfo(memberId);
         return new ResponseEntity(memberInfoResponseDto, HttpStatus.OK);
     }
 
@@ -47,7 +49,7 @@ public class MemberController {
             @RequestBody @Valid NicknameRequestDto nicknameRequestDto,
             @Parameter(hidden = true) @AuthMemberId Long memberId
     ) {
-        authService.updateNickname(memberId, nicknameRequestDto);
+        memberService.updateNickname(memberId, nicknameRequestDto);
         return new ResponseEntity(HttpStatus.OK);
     }
 

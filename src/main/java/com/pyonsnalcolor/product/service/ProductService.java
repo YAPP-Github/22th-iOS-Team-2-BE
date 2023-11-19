@@ -1,10 +1,7 @@
 package com.pyonsnalcolor.product.service;
 
 import com.pyonsnalcolor.exception.PyonsnalcolorProductException;
-import com.pyonsnalcolor.product.dto.ProductFilterRequestDto;
-import com.pyonsnalcolor.product.dto.ProductResponseDto;
-import com.pyonsnalcolor.product.dto.ReviewDto;
-import com.pyonsnalcolor.product.dto.ReviewRequestDto;
+import com.pyonsnalcolor.product.dto.*;
 import com.pyonsnalcolor.product.entity.*;
 import com.pyonsnalcolor.product.enumtype.*;
 import com.pyonsnalcolor.product.repository.BasicProductRepository;
@@ -40,6 +37,15 @@ public abstract class ProductService {
     public ProductResponseDto getProductById(String id) {
         BaseProduct baseProduct = (BaseProduct) basicProductRepository.findById(id).get();
         baseProduct.increaseViewCount();
+        basicProductRepository.save(baseProduct);
+        return baseProduct.convertToDto();
+    }
+
+    @Transactional
+    public ProductResponseDto updateCategory(CategoryRequestDto categoryRequestDto) {
+        BaseProduct baseProduct = (BaseProduct) basicProductRepository.findById(categoryRequestDto.getId()).get();
+        Category category = Category.valueOf(categoryRequestDto.getCategory());
+        baseProduct.updateCategory(category);
         basicProductRepository.save(baseProduct);
         return baseProduct.convertToDto();
     }

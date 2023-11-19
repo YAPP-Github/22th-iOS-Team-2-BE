@@ -2,10 +2,7 @@ package com.pyonsnalcolor.product.controller;
 
 import com.pyonsnalcolor.member.AuthMemberId;
 import com.pyonsnalcolor.member.service.MemberService;
-import com.pyonsnalcolor.product.dto.EventProductResponseDto;
-import com.pyonsnalcolor.product.dto.ProductFilterRequestDto;
-import com.pyonsnalcolor.product.dto.ProductResponseDto;
-import com.pyonsnalcolor.product.dto.ReviewRequestDto;
+import com.pyonsnalcolor.product.dto.*;
 import com.pyonsnalcolor.product.enumtype.ProductType;
 import com.pyonsnalcolor.product.service.EventProductService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -87,5 +84,12 @@ public class EventProductController {
         eventProductService.hateReview(productId, reviewId, writerId);
 
         return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "카테고리 설정", description = "상품의 카테고리를 수정합니다")
+    @PatchMapping(value = "/products/event-products/category")
+    public ResponseEntity<Void> modifyCategory(@RequestBody CategoryRequestDto categoryRequestDto) {
+        ProductResponseDto responseDto = eventProductService.updateCategory(categoryRequestDto);
+        return new ResponseEntity(responseDto, HttpStatus.OK);
     }
 }

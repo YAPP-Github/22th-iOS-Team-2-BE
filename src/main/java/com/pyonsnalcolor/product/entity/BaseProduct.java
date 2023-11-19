@@ -73,6 +73,10 @@ public abstract class BaseProduct extends BaseTimeEntity {
         return Comparator.comparing(p -> Category.GOODS.equals(p.getCategory()));
     }
 
+    public void updateCategory(Category category) {
+        this.category = category;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof BaseProduct))

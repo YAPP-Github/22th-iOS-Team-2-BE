@@ -120,7 +120,7 @@ class AuthServiceTest {
         Member savedMember = memberRepository.save(member);
         Long memberId = savedMember.getId();
         String updatedNickname = "새로운 닉네임";
-        memberService.updateNickname(memberId, new NicknameRequestDto(updatedNickname));
+        memberService.updateProfile(memberId, null, new NicknameRequestDto(updatedNickname));
 
         // when
         Member findMember = memberRepository.getReferenceById(memberId);

@@ -19,6 +19,9 @@ public class MemberInfoResponseDto {
     private String oauthType;
 
     @NotBlank
+    private String profileImage;
+
+    @NotBlank
     private Long memberId;
 
     @NotBlank
@@ -32,6 +35,7 @@ public class MemberInfoResponseDto {
         this.oauthId = member.getOAuthId();
         this.oauthType = member.getOAuthType().toString();
         this.nickname  = member.getNickname();
+        this.profileImage = member.getProfileImage();
         this.email  = member.getEmail();
     }
 }

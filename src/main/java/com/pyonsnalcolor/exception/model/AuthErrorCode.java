@@ -27,7 +27,8 @@ public enum AuthErrorCode implements ErrorCode {
     EMAIL_UNAUTHORIZED(UNAUTHORIZED, "이메일이 유효하지 않습니다."),
     OAUTH_UNSUPPORTED(UNAUTHORIZED, "해당 OAuth 타입은 지원하지 않습니다."),
 
-    NICKNAME_ALREADY_EXIST(BAD_REQUEST, "중복된 닉네임입니다.");
+    NICKNAME_ALREADY_EXIST(BAD_REQUEST, "중복된 닉네임입니다."),
+    INVALID_NICKNAME(BAD_REQUEST, "닉네임 형식에 맞지 않습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

@@ -12,6 +12,7 @@ import com.pyonsnalcolor.member.repository.MemberRepository;
 import com.pyonsnalcolor.product.ProductFactory;
 import com.pyonsnalcolor.product.dto.ProductResponseDto;
 import com.pyonsnalcolor.product.enumtype.ProductType;
+import com.pyonsnalcolor.product.repository.ImageRepository;
 import com.pyonsnalcolor.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,12 +20,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.pyonsnalcolor.exception.model.AuthErrorCode.NICKNAME_ALREADY_EXIST;
-import static com.pyonsnalcolor.exception.model.AuthErrorCode.REFRESH_TOKEN_MISMATCH;
+import static com.pyonsnalcolor.exception.model.AuthErrorCode.*;
 import static com.pyonsnalcolor.exception.model.CommonErrorCode.*;
 
 @Slf4j
@@ -35,26 +36,51 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final FavoriteRepository favoriteRepository;
     private final ProductFactory productFactory;
+    private final ImageRepository imageRepository;
 
     public MemberInfoResponseDto getMemberInfo(Long memberId) {
         Member member = memberRepository.getReferenceById(memberId);
         return new MemberInfoResponseDto(member);
     }
 
-    public void updateNickname(Long memberId, NicknameRequestDto nicknameRequestDto
-    ) {
+    public void updateProfile(Long memberId, MultipartFile profileImage, NicknameRequestDto nicknameRequestDto) {
         Member member = memberRepository.getReferenceById(memberId);
-        String updatedNickname = nicknameRequestDto.getNickname();
-        if (checkIfNicknameIsDuplicate(updatedNickname)) {
-            throw new PyonsnalcolorAuthException(NICKNAME_ALREADY_EXIST);
+        if (nicknameRequestDto != null) {
+            member = updateNickname(member, nicknameRequestDto);
         }
-
-        member.updateNickname(updatedNickname);
+        if (profileImage != null && !profileImage.isEmpty()) {
+            member = updateProfileImage(member, profileImage);
+        }
         memberRepository.save(member);
     }
 
-    private boolean checkIfNicknameIsDuplicate(String nickname) {
-       return memberRepository.findByNickname(nickname).isPresent();
+    private Member updateNickname(Member member, NicknameRequestDto nicknameRequestDto) {
+        String updatedNickname = nicknameRequestDto.getNickname();
+        validateNicknameFormat(nicknameRequestDto);
+        checkIfNicknameIsDuplicate(nicknameRequestDto);
+
+        member.updateNickname(updatedNickname);
+        return member;
+    }
+
+    private Member updateProfileImage(Member member, MultipartFile profileImage) {
+        String filePath = imageRepository.uploadImage(profileImage);
+        member.updateProfileImage(filePath);
+        return member;
+    }
+
+    private void validateNicknameFormat(NicknameRequestDto nicknameRequestDto) {
+        String nickname = nicknameRequestDto.getNickname();
+        if (nickname.isBlank() || nickname.length() > 15) {
+            throw new PyonsnalcolorAuthException(INVALID_NICKNAME);
+        }
+    }
+
+    public void checkIfNicknameIsDuplicate(NicknameRequestDto nicknameRequestDto) {
+        String nickname = nicknameRequestDto.getNickname();
+        if (!memberRepository.findByNickname(nickname).isEmpty()) {
+            throw new PyonsnalcolorAuthException(NICKNAME_ALREADY_EXIST);
+        }
     }
 
     public Slice<String> getProductIdsOfFavorite(Pageable pageable, Long memberId, ProductType productType) {

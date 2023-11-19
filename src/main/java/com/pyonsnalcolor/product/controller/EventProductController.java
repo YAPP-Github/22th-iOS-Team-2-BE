@@ -18,6 +18,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @Tag(name = "이벤트 상품 api")
 @RestController
 @RequiredArgsConstructor
@@ -38,7 +40,8 @@ public class EventProductController {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Page<ProductResponseDto> products = eventProductService.getPagedProductsByFilter(
                 pageable, storeType, productFilterRequestDto);
-        Page<ProductResponseDto> results = memberService.updateProductsIfFavorite(products, ProductType.EVENT, memberId);
+        List<String> favoriteIds = memberService.getProductIdsOfFavorite(memberId, ProductType.EVENT);
+        Page<ProductResponseDto> results = memberService.updateProductsIfFavorite(products, favoriteIds);
         return new ResponseEntity(results, HttpStatus.OK);
     }
 
@@ -61,8 +64,9 @@ public class EventProductController {
             @PathVariable String id,
             @Parameter(hidden = true) @AuthMemberId Long memberId
     ) {
+        List<String> favoriteIds = memberService.getProductIdsOfFavorite(memberId, ProductType.EVENT);
         ProductResponseDto product = eventProductService.getProductById(id);
-        ProductResponseDto result = memberService.updateProductIfFavorite(product, ProductType.EVENT, memberId);
+        ProductResponseDto result = memberService.updateProductIfFavorite(product, favoriteIds);
         return new ResponseEntity(result, HttpStatus.OK);
     }
 

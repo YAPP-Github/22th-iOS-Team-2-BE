@@ -42,25 +42,20 @@ public class MemberService {
                 .collect(Collectors.toUnmodifiableList());
     }
 
-    public Page<ProductResponseDto> updateProductsIfFavorite(Page<ProductResponseDto> products,
-                                                             ProductType productType,
-                                                             Long memberId) {
-        List<String> favoriteProductIds = getProductIdsOfFavorite(memberId, productType);
+    public List<String> getProductIdsOfFavorite(Long memberId) {
+        return favoriteRepository.getFavoriteByMemberId(memberId)
+                .stream().map(Favorite::getProductId)
+                .collect(Collectors.toUnmodifiableList());
+    }
 
+    public Page<ProductResponseDto> updateProductsIfFavorite(Page<ProductResponseDto> products,
+                                                             List<String> favoriteIds) {
         return products.map(
-                p -> {
-                    if (favoriteProductIds.contains(p.getId())) {
-                        p.setFavoriteTrue();
-                    }
-                    return p;
-                });
+                p -> updateProductIfFavorite(p, favoriteIds));
     }
 
     public ProductResponseDto updateProductIfFavorite(ProductResponseDto product,
-                                                      ProductType productType,
-                                                      Long memberId) {
-        List<String> favoriteProductIds = getProductIdsOfFavorite(memberId, productType);
-
+                                                      List<String> favoriteProductIds) {
         if (favoriteProductIds.contains(product.getId())) {
             product.setFavoriteTrue();
         }

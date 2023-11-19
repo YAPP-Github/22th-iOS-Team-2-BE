@@ -1,11 +1,11 @@
 package com.pyonsnalcolor.product.service;
 
+import com.pyonsnalcolor.member.service.MemberService;
 import com.pyonsnalcolor.product.dto.*;
 import com.pyonsnalcolor.product.entity.BaseEventProduct;
 import com.pyonsnalcolor.product.entity.BasePbProduct;
 import com.pyonsnalcolor.product.entity.BaseProduct;
 import com.pyonsnalcolor.product.enumtype.Curation;
-import com.pyonsnalcolor.product.enumtype.Filter;
 import com.pyonsnalcolor.product.enumtype.Sorted;
 import com.pyonsnalcolor.product.repository.EventProductRepository;
 import com.pyonsnalcolor.product.repository.PbProductRepository;
@@ -14,9 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -27,6 +25,7 @@ import java.util.stream.Collectors;
 public class SearchProductService {
     private final EventProductRepository eventProductRepository;
     private final PbProductRepository pbProductRepository;
+    private final MemberService memberService;
 
     public Page<ProductResponseDto> searchProduct(int pageNumber, int pageSize, int sorted, String searchKeyword) {
         List<BaseEventProduct> eventProducts = eventProductRepository.findByNameContaining(searchKeyword);
@@ -47,14 +46,14 @@ public class SearchProductService {
     ) {
         List<BaseProduct> products = eventProducts.stream()
                 .filter(event -> pbProducts.stream()
-                        .noneMatch(pb -> event.getName().equals(pb.getName())))
+                        .noneMatch(pb -> event.equals(pb)))
                 .collect(Collectors.toList());
         products.addAll(pbProducts);
         return products;
     }
 
-    private List<ProductResponseDto> convertToProductResponseDto(List<BaseProduct> searchProducts) {
-        List<ProductResponseDto> responseDtos = searchProducts.stream()
+    private List<ProductResponseDto> convertToProductResponseDto(List<BaseProduct> products) {
+        List<ProductResponseDto> responseDtos = products.stream()
                 .map(BaseProduct::convertToDto)
                 .collect(Collectors.toList());
 
@@ -68,22 +67,26 @@ public class SearchProductService {
         return new PageImpl<>(list.subList(start, end), pageRequest, list.size());
     }
 
-    public CurationProductsResponseDto getCurationProducts() {
-        List<Curation> curations = Arrays.stream(Curation.values()).collect(Collectors.toUnmodifiableList());
+    public CurationProductsResponseDto getCurationProducts(List<String> favoriteIds) {
+        List<Curation> curations = Arrays.asList(Curation.values());
 
         List<CurationProductResponseDto> curationProductResponseDtos = curations.stream()
-                .map(curation -> {
-                    List<PbProductResponseDto> products = pbProductRepository.findByCuration(curation)
-                            .stream()
-                            .map(BasePbProduct::convertToDto)
-                            .collect(Collectors.toUnmodifiableList());
-                    return CurationProductResponseDto.builder()
-                            .title(curation.getKorean())
-                            .subTitle(curation.getDescription())
-                            .products(products)
-                            .build();
-                }).collect(Collectors.toUnmodifiableList());
+                .map(curation -> createCurationProductResponseDto(curation, favoriteIds))
+                .collect(Collectors.toUnmodifiableList());
 
         return new CurationProductsResponseDto(curationProductResponseDtos);
+    }
+
+    private CurationProductResponseDto createCurationProductResponseDto(Curation curation, List<String> favoriteIds) {
+        List<ProductResponseDto> products = pbProductRepository.findByCuration(curation)
+                .stream()
+                .map(p -> memberService.updateProductIfFavorite(p.convertToDto(), favoriteIds))
+                .collect(Collectors.toUnmodifiableList());
+
+        return CurationProductResponseDto.builder()
+                .title(curation.getKorean())
+                .subTitle(curation.getDescription())
+                .products(products)
+                .build();
     }
 }

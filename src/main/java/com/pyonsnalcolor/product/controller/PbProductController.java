@@ -18,6 +18,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @Tag(name = "PB 상품 api")
 @RestController
 @RequiredArgsConstructor
@@ -38,7 +40,8 @@ public class PbProductController {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Page<ProductResponseDto> products = pbProductService.getPagedProductsByFilter(
                 pageable, storeType, productFilterRequestDto);
-        Page<ProductResponseDto> results = memberService.updateProductsIfFavorite(products, ProductType.PB, memberId);
+        List<String> favoriteIds = memberService.getProductIdsOfFavorite(memberId, ProductType.PB);
+        Page<ProductResponseDto> results = memberService.updateProductsIfFavorite(products, favoriteIds);
         return new ResponseEntity(results, HttpStatus.OK);
     }
 
@@ -61,8 +64,9 @@ public class PbProductController {
             @PathVariable String id,
             @Parameter(hidden = true) @AuthMemberId Long memberId
     ) {
+        List<String> favoriteIds = memberService.getProductIdsOfFavorite(memberId, ProductType.PB);
         ProductResponseDto product = pbProductService.getProductById(id);
-        ProductResponseDto result = memberService.updateProductIfFavorite(product, ProductType.PB, memberId);
+        ProductResponseDto result = memberService.updateProductIfFavorite(product, favoriteIds);
         return new ResponseEntity(result, HttpStatus.OK);
     }
 

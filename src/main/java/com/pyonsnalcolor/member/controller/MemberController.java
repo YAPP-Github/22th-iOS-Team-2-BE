@@ -70,7 +70,8 @@ public class MemberController {
     public ResponseEntity<Void> validateNickname(
             @RequestBody @Valid NicknameRequestDto nicknameRequestDto
     ) {
-        memberService.checkIfNicknameIsDuplicate(nicknameRequestDto);
+
+        memberService.validateNicknameFormat(nicknameRequestDto);
         return new ResponseEntity(HttpStatus.OK);
     }
 

@@ -28,7 +28,7 @@ public enum AuthErrorCode implements ErrorCode {
     OAUTH_UNSUPPORTED(UNAUTHORIZED, "해당 OAuth 타입은 지원하지 않습니다."),
 
     NICKNAME_ALREADY_EXIST(BAD_REQUEST, "중복된 닉네임입니다."),
-    INVALID_NICKNAME(BAD_REQUEST, "닉네임 형식에 맞지 않습니다.");
+    INVALID_BLANK_NICKNAME(BAD_REQUEST, "닉네임은 공백이 아닌 값을 입력해주세요.");
 
     private final HttpStatus httpStatus;
     private final String message;

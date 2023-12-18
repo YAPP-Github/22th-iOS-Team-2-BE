@@ -54,29 +54,33 @@ public class MemberService {
         memberRepository.save(member);
     }
 
-    private Member updateNickname(Member member, NicknameRequestDto nicknameRequestDto) {
-        String updatedNickname = nicknameRequestDto.getNickname();
-        validateNicknameFormat(nicknameRequestDto);
-        checkIfNicknameIsDuplicate(nicknameRequestDto);
-
-        member.updateNickname(updatedNickname);
-        return member;
-    }
-
     private Member updateProfileImage(Member member, MultipartFile profileImage) {
         String filePath = imageRepository.uploadImage(profileImage);
         member.updateProfileImage(filePath);
         return member;
     }
 
-    private void validateNicknameFormat(NicknameRequestDto nicknameRequestDto) {
+    private Member updateNickname(Member member, NicknameRequestDto nicknameRequestDto) {
+        validateNicknameFormat(nicknameRequestDto);
+
+        String updatedNickname = nicknameRequestDto.getNickname();
+        member.updateNickname(updatedNickname);
+        return member;
+    }
+
+    public void validateNicknameFormat(NicknameRequestDto nicknameRequestDto) {
+        validateNonBlankNickname(nicknameRequestDto);
+        checkIfNicknameIsDuplicate(nicknameRequestDto);
+    }
+
+    private void validateNonBlankNickname(NicknameRequestDto nicknameRequestDto) {
         String nickname = nicknameRequestDto.getNickname();
-        if (nickname.isBlank() || nickname.length() > 15) {
-            throw new PyonsnalcolorAuthException(INVALID_NICKNAME);
+        if (nickname.isBlank()) {
+            throw new PyonsnalcolorAuthException(INVALID_BLANK_NICKNAME);
         }
     }
 
-    public void checkIfNicknameIsDuplicate(NicknameRequestDto nicknameRequestDto) {
+    private void checkIfNicknameIsDuplicate(NicknameRequestDto nicknameRequestDto) {
         String nickname = nicknameRequestDto.getNickname();
         if (!memberRepository.findByNickname(nickname).isEmpty()) {
             throw new PyonsnalcolorAuthException(NICKNAME_ALREADY_EXIST);

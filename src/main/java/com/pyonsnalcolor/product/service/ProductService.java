@@ -150,7 +150,7 @@ public abstract class ProductService {
                 .build();
 
         baseProduct.addReview(review);
-
+        baseProduct.increaseReviewCount();
         basicProductRepository.save(baseProduct);
     }
 

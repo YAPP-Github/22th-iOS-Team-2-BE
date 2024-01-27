@@ -2,6 +2,8 @@ package com.pyonsnalcolor.product.service;
 
 import com.pyonsnalcolor.member.service.MemberService;
 import com.pyonsnalcolor.product.dto.*;
+import com.pyonsnalcolor.product.dto.banner.CurationProductResponseDto;
+import com.pyonsnalcolor.product.dto.banner.CurationProductsResponseDto;
 import com.pyonsnalcolor.product.entity.BaseEventProduct;
 import com.pyonsnalcolor.product.entity.BasePbProduct;
 import com.pyonsnalcolor.product.entity.BaseProduct;
@@ -65,28 +67,5 @@ public class SearchProductService {
         int end = Math.min((start + pageRequest.getPageSize()), list.size());
 
         return new PageImpl<>(list.subList(start, end), pageRequest, list.size());
-    }
-
-    public CurationProductsResponseDto getCurationProducts(List<String> favoriteIds) {
-        List<Curation> curations = Arrays.asList(Curation.values());
-
-        List<CurationProductResponseDto> curationProductResponseDtos = curations.stream()
-                .map(curation -> createCurationProductResponseDto(curation, favoriteIds))
-                .collect(Collectors.toUnmodifiableList());
-
-        return new CurationProductsResponseDto(curationProductResponseDtos);
-    }
-
-    private CurationProductResponseDto createCurationProductResponseDto(Curation curation, List<String> favoriteIds) {
-        List<ProductResponseDto> products = pbProductRepository.findByCuration(curation)
-                .stream()
-                .map(p -> memberService.updateProductIfFavorite(p.convertToDto(), favoriteIds))
-                .collect(Collectors.toUnmodifiableList());
-
-        return CurationProductResponseDto.builder()
-                .title(curation.getKorean())
-                .subTitle(curation.getDescription())
-                .products(products)
-                .build();
     }
 }

@@ -20,7 +20,7 @@ public enum Sorted implements Filter {
             "조회순",
             null,
             Sort.by("viewCount").descending().and(Sort.by("_id").ascending()),
-            Comparator.comparing(BaseProduct::getId)),
+            Comparator.comparing(BaseProduct::getViewCount).reversed().thenComparing(BaseProduct::getId)),
     LOW_PRICE(3,
             "낮은가격순",
             null,
@@ -30,11 +30,12 @@ public enum Sorted implements Filter {
             "높은가격순",
             null,
             Sort.by("price").descending().and(Sort.by("_id").ascending()),
-            Comparator.comparing(BaseProduct::getPrice).reversed().thenComparing(BaseProduct::getId));
-//    REVIEW(5,
-//            "리뷰순",
-//            null,
-//            Comparator.comparing(BaseProduct::getId)); // TODO: 이후 추가
+            Comparator.comparing(BaseProduct::getPrice).reversed().thenComparing(BaseProduct::getId)),
+    REVIEW(5,
+            "리뷰순",
+            null,
+            Sort.by("reviewCount").descending().and(Sort.by("_id").ascending()),
+            Comparator.comparing(BaseProduct::getReviewCount).reversed().thenComparing(BaseProduct::getId));
 
     private final int code;
     private final String korean;

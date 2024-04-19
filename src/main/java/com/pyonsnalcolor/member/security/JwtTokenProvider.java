@@ -2,6 +2,7 @@ package com.pyonsnalcolor.member.security;
 
 import com.pyonsnalcolor.member.dto.TokenDto;
 import com.pyonsnalcolor.exception.PyonsnalcolorAuthException;
+import com.pyonsnalcolor.member.enumtype.Role;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +32,9 @@ public class JwtTokenProvider {
     private long accessTokenValidity;
     private long refreshTokenValidity;
     private SecretKey secretKey;
-    private String OAUTH_ID = "oAuthId";
+    private static final String OAUTH_ID = "oAuthId";
+    private static final String GUEST = "GUEST";
+    private static final String ROLE = "ROLE";
 
     public JwtTokenProvider(@Value("${jwt.secret}") String jwtSecretKey,
                             @Value("${jwt.access-token.validity}") long accessTokenValidity,
@@ -41,7 +44,7 @@ public class JwtTokenProvider {
         this.secretKey = Keys.hmacShaKeyFor(jwtSecretKey.getBytes());
     }
 
-    public TokenDto createAccessAndRefreshTokenDto(String oauthId) {
+    public TokenDto createAccessAndRefreshTokenDto(Role role, String oauthId) {
         String accessToken = createBearerTokenWithValidity(oauthId, accessTokenValidity);
         String refreshToken = createBearerTokenWithValidity(oauthId, refreshTokenValidity);
 
@@ -52,11 +55,11 @@ public class JwtTokenProvider {
     }
 
     public String createBearerTokenWithValidity(String oauthId, long tokenValidity){
-        String accessToken = createTokenWithValidity(oauthId, tokenValidity);
+        String accessToken = createTokenWithRoleAndValidity(oauthId, tokenValidity);
         return createBearerHeader(accessToken);
     }
 
-    private String createTokenWithValidity(String oAuthId, long tokenValidity){
+    private String createTokenWithRoleAndValidity(String oAuthId, long tokenValidity){
         Date now = new Date();
         Date expirationAt = new Date(now.getTime() + tokenValidity);
 

@@ -8,7 +8,7 @@ import java.util.List;
 public enum Curation implements Filter {
 
     SNS("SNS 추천 상품✨", null, "인플루언서들이 추천하는 편의점별 단독 상품"),
-    SEASON("무더운 여름을 이겨낼⛱", null, "더운 여름에 추천하는 편의점별 단독 상품"),
+    SEASON("추운 겨울을 이겨낼⛄❄", null, "추운 겨울에 추천하는 편의점별 단독 상품"),
     STEADY_SELLER("올해의 스테디셀러\uD83D\uDC98", null, "꾸준히 사랑받고 있는 편의점별 단독 상품");
 
     private final String korean;

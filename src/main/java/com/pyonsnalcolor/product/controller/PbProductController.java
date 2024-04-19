@@ -2,16 +2,14 @@ package com.pyonsnalcolor.product.controller;
 
 import com.pyonsnalcolor.member.AuthMemberId;
 import com.pyonsnalcolor.member.service.MemberService;
-import com.pyonsnalcolor.product.dto.PbProductResponseDto;
-import com.pyonsnalcolor.product.dto.ProductFilterRequestDto;
-import com.pyonsnalcolor.product.dto.ProductResponseDto;
-import com.pyonsnalcolor.product.dto.ReviewRequestDto;
+import com.pyonsnalcolor.product.dto.*;
 import com.pyonsnalcolor.product.enumtype.ProductType;
 import com.pyonsnalcolor.product.service.PbProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +19,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
+@Slf4j
 @Tag(name = "PB 상품 api")
 @RestController
 @RequiredArgsConstructor
@@ -38,10 +39,12 @@ public class PbProductController {
             @RequestBody ProductFilterRequestDto productFilterRequestDto,
             @Parameter(hidden = true) @AuthMemberId Long memberId
     ) {
+        log.info("PB 상품 필터 조회 memberId : {}", memberId);
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Page<ProductResponseDto> products = pbProductService.getPagedProductsByFilter(
                 pageable, storeType, productFilterRequestDto);
-        Page<ProductResponseDto> results = memberService.updateProductsIfFavorite(products, ProductType.PB, memberId);
+        List<String> favoriteIds = memberService.getProductIdsOfFavorite(memberId, ProductType.PB);
+        Page<ProductResponseDto> results = memberService.updateProductsIfFavorite(products, favoriteIds);
         return new ResponseEntity(results, HttpStatus.OK);
     }
 
@@ -64,8 +67,9 @@ public class PbProductController {
             @PathVariable String id,
             @Parameter(hidden = true) @AuthMemberId Long memberId
     ) {
+        List<String> favoriteIds = memberService.getProductIdsOfFavorite(memberId, ProductType.PB);
         ProductResponseDto product = pbProductService.getProductById(id);
-        ProductResponseDto result = memberService.updateProductIfFavorite(product, ProductType.PB, memberId);
+        ProductResponseDto result = memberService.updateProductIfFavorite(product, favoriteIds);
         return new ResponseEntity(result, HttpStatus.OK);
     }
 
@@ -87,5 +91,12 @@ public class PbProductController {
         pbProductService.hateReview(productId, reviewId, writerId);
 
         return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "카테고리 설정", description = "상품의 카테고리를 수정합니다")
+    @PatchMapping(value = "/products/pb-products/category")
+    public ResponseEntity<Void> modifyCategory(@RequestBody CategoryRequestDto categoryRequestDto) {
+        ProductResponseDto responseDto = pbProductService.updateCategory(categoryRequestDto);
+        return new ResponseEntity(responseDto, HttpStatus.OK);
     }
 }

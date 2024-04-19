@@ -24,7 +24,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.pyonsnalcolor.exception.model.AuthErrorCode.*;
@@ -42,6 +44,7 @@ public class AuthService {
     private String bearerHeader;
 
     private static final String LOGOUT_BLACKLIST = "logout";
+    private static final String GUEST = "GUEST";
 
     private final MemberRepository memberRepository;
     private final PushProductStoreRepository pushProductStoreRepository;
@@ -69,12 +72,13 @@ public class AuthService {
                 .accessToken(newAccessToken)
                 .refreshToken(refreshToken)
                 .isFirstLogin(false)
+                .isGuest(false)
                 .build();
     }
 
     public LoginResponseDto join(OAuthType oAuthType, String email) {
         String oauthId = oAuthType.addOAuthTypeHeaderWithEmail(email);
-        TokenDto tokenDto = jwtTokenProvider.createAccessAndRefreshTokenDto(oauthId);
+        TokenDto tokenDto = jwtTokenProvider.createAccessAndRefreshTokenDto(Role.ROLE_USER, oauthId);
         String accessToken = tokenDto.getAccessToken();
         String refreshToken = tokenDto.getRefreshToken();
 
@@ -93,6 +97,7 @@ public class AuthService {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .isFirstLogin(true)
+                .isGuest(false)
                 .build();
     }
 
@@ -126,6 +131,7 @@ public class AuthService {
 
         return LoginResponseDto.builder()
                 .isFirstLogin(false)
+                .isGuest(false)
                 .accessToken(newAccessToken)
                 .refreshToken(refreshToken)
                 .build();
@@ -159,22 +165,6 @@ public class AuthService {
                 .forEach(pushProductStoreRepository::delete);
     }
 
-    public MemberInfoResponseDto getMemberInfo(Long memberId) {
-        Member member = memberRepository.getReferenceById(memberId);
-        return new MemberInfoResponseDto(member);
-    }
-
-    public void updateNickname(
-            Long memberId,
-            NicknameRequestDto nicknameRequestDto
-    ) {
-        Member member = memberRepository.getReferenceById(memberId);
-        String updatedNickname = nicknameRequestDto.getNickname();
-
-        member.updateNickname(updatedNickname);
-        memberRepository.save(member);
-    }
-
     public void logout(TokenDto tokenDto) {
         String bearerToken = tokenDto.getAccessToken();
         String accessToken = jwtTokenProvider.resolveBearerToken(bearerToken);
@@ -192,6 +182,31 @@ public class AuthService {
         Boolean isJoined = memberRepository.findByoAuthId(oauthId).isPresent();
         return JoinStatusResponseDto.builder()
                 .isJoined(isJoined)
+                .build();
+    }
+
+
+    public LoginResponseDto guestLogin() {
+        log.info("게스트 로그인 시도 : " + new Date());
+        TokenDto tokenDto = jwtTokenProvider.createAccessAndRefreshTokenDto(Role.ROLE_GUEST, Role.ROLE_GUEST.toString());
+        String token = tokenDto.getRefreshToken();
+
+        Optional<Member> findMember = memberRepository.findByoAuthId(Role.ROLE_GUEST.toString());
+
+        if (findMember.isEmpty()) {
+            Member member = Member.builder()
+                    .refreshToken(token)
+                    .oAuthId(Role.ROLE_GUEST.toString()) // PK
+                    .role(Role.ROLE_GUEST)
+                    .build();
+            memberRepository.save(member);
+        }
+
+        return LoginResponseDto.builder()
+                .accessToken(token)
+                .refreshToken(token)
+                .isFirstLogin(true)
+                .isGuest(true)
                 .build();
     }
 }

@@ -3,6 +3,7 @@ package com.pyonsnalcolor.member.controller;
 import com.pyonsnalcolor.member.service.AuthService;
 import com.pyonsnalcolor.exception.PyonsnalcolorAuthException;
 import com.pyonsnalcolor.exception.GlobalExceptionHandler;
+import com.pyonsnalcolor.member.service.MemberService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,7 +40,7 @@ public class MemberControllerTest {
     @Autowired
     private MockMvc mockMvc;
     @Mock
-    private AuthService authService;
+    private MemberService memberService;
     @InjectMocks
     private MemberController memberController;
 
@@ -59,7 +60,7 @@ public class MemberControllerTest {
     @Test
     public void getMemberInfo_ThrowsException_AccessTokenNotBearerFormat() throws Exception {
         // given
-        Mockito.when(authService.getMemberInfo(any()))
+        Mockito.when(memberService.getMemberInfo(any()))
                 .thenThrow(new PyonsnalcolorAuthException(ACCESS_TOKEN_NOT_BEARER));
 
         // when & then

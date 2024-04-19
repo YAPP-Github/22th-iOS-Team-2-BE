@@ -2,6 +2,7 @@ package com.pyonsnalcolor.product.entity;
 
 import com.pyonsnalcolor.product.dto.ProductResponseDto;
 import com.pyonsnalcolor.product.enumtype.Category;
+import com.pyonsnalcolor.product.enumtype.Curation;
 import com.pyonsnalcolor.product.enumtype.EventType;
 import com.pyonsnalcolor.product.enumtype.StoreType;
 import lombok.Getter;
@@ -45,7 +46,19 @@ public abstract class BaseProduct extends BaseTimeEntity {
 
     private List<Review> reviews = new ArrayList<>();
 
+    private int reviewCount;
+
     private int viewCount;
+
+    private Curation curation;
+
+    public void updateCuration(Curation curation) {
+        this.curation = curation;
+    }
+
+    public void deleteCuration() {
+        this.curation = null;
+    }
 
     public abstract ProductResponseDto convertToDto();
 
@@ -55,6 +68,14 @@ public abstract class BaseProduct extends BaseTimeEntity {
 
     public void increaseViewCount() {
         this.viewCount += 1;
+    }
+
+    public void increaseReviewCount() {
+        this.reviewCount += 1;
+    }
+
+    public void decreaseReviewCount() {
+        this.reviewCount -= 1;
     }
 
     public void updateIsNew(boolean isNew) {
@@ -71,6 +92,10 @@ public abstract class BaseProduct extends BaseTimeEntity {
 
     public static Comparator<BaseProduct> getCategoryComparator() {
         return Comparator.comparing(p -> Category.GOODS.equals(p.getCategory()));
+    }
+
+    public void updateCategory(Category category) {
+        this.category = category;
     }
 
     @Override

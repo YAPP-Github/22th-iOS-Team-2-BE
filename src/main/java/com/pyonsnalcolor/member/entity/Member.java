@@ -35,6 +35,9 @@ public class Member extends BaseTimeEntity {
     @Pattern(regexp="^[0-9a-zA-Zㄱ-ㅎ가-힣 ]{1,15}")
     private String nickname;
 
+    @Column(name = "profile_image")
+    private String profileImage;
+
     @Column(length = 500)
     private String refreshToken;
 
@@ -60,5 +63,9 @@ public class Member extends BaseTimeEntity {
 
     public void updateNickname(String updatedNickname) {
         this.nickname = updatedNickname;
+    }
+
+    public void updateProfileImage(String updatedProfileImage) {
+        this.profileImage = updatedProfileImage;
     }
 }

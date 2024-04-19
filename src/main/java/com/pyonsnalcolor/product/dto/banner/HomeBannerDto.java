@@ -1,4 +1,4 @@
-package com.pyonsnalcolor.product.dto;
+package com.pyonsnalcolor.product.dto.banner;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -9,12 +9,16 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
-@Schema(description = "PICK! 조회 화면의 큐레이션들 전체 Response DTO")
+@Schema(description = "홈 화면 - 큐레이션 및 이벤트 이미지 조회용 DTO")
 @Builder
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CurationProductsResponseDto {
+public class HomeBannerDto {
+
     @NotNull
-    private List<CurationProductResponseDto> curationProducts;
+    private String type;
+
+    @NotNull
+    private List<Object> value;
 }

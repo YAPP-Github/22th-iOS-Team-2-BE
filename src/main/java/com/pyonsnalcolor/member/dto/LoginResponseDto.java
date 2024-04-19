@@ -19,6 +19,10 @@ public class LoginResponseDto {
     @NotBlank
     private Boolean isFirstLogin;
 
+    @Schema(description = "게스트 유저인지 구분용", required = true)
+    @NotBlank
+    private Boolean isGuest;
+
     @NotBlank
     private String accessToken;
 

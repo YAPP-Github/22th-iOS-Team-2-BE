@@ -22,7 +22,6 @@ import java.util.List;
 @Document(collection = "pb_product")
 public class BasePbProduct extends BaseProduct {
     private Recommend recommend;
-    private Curation curation;
 
     @Override
     public PbProductResponseDto convertToDto() {
@@ -63,13 +62,5 @@ public class BasePbProduct extends BaseProduct {
 
     public void deleteRecommend() {
         this.recommend = null;
-    }
-
-    public void updateCuration(Curation curation) {
-        this.curation = curation;
-    }
-
-    public void deleteCuration() {
-        this.curation = null;
     }
 }

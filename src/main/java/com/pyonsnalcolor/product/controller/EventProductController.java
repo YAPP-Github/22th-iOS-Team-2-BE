@@ -2,10 +2,7 @@ package com.pyonsnalcolor.product.controller;
 
 import com.pyonsnalcolor.member.AuthMemberId;
 import com.pyonsnalcolor.member.service.MemberService;
-import com.pyonsnalcolor.product.dto.EventProductResponseDto;
-import com.pyonsnalcolor.product.dto.ProductFilterRequestDto;
-import com.pyonsnalcolor.product.dto.ProductResponseDto;
-import com.pyonsnalcolor.product.dto.ReviewRequestDto;
+import com.pyonsnalcolor.product.dto.*;
 import com.pyonsnalcolor.product.enumtype.ProductType;
 import com.pyonsnalcolor.product.service.EventProductService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,6 +17,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Tag(name = "이벤트 상품 api")
 @RestController
@@ -41,7 +40,8 @@ public class EventProductController {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Page<ProductResponseDto> products = eventProductService.getPagedProductsByFilter(
                 pageable, storeType, productFilterRequestDto);
-        Page<ProductResponseDto> results = memberService.updateProductsIfFavorite(products, ProductType.EVENT, memberId);
+        List<String> favoriteIds = memberService.getProductIdsOfFavorite(memberId, ProductType.EVENT);
+        Page<ProductResponseDto> results = memberService.updateProductsIfFavorite(products, favoriteIds);
         return new ResponseEntity(results, HttpStatus.OK);
     }
 
@@ -64,8 +64,9 @@ public class EventProductController {
             @PathVariable String id,
             @Parameter(hidden = true) @AuthMemberId Long memberId
     ) {
+        List<String> favoriteIds = memberService.getProductIdsOfFavorite(memberId, ProductType.EVENT);
         ProductResponseDto product = eventProductService.getProductById(id);
-        ProductResponseDto result = memberService.updateProductIfFavorite(product, ProductType.EVENT, memberId);
+        ProductResponseDto result = memberService.updateProductIfFavorite(product, favoriteIds);
         return new ResponseEntity(result, HttpStatus.OK);
     }
 
@@ -87,5 +88,12 @@ public class EventProductController {
         eventProductService.hateReview(productId, reviewId, writerId);
 
         return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "카테고리 설정", description = "상품의 카테고리를 수정합니다")
+    @PatchMapping(value = "/products/event-products/category")
+    public ResponseEntity<Void> modifyCategory(@RequestBody CategoryRequestDto categoryRequestDto) {
+        ProductResponseDto responseDto = eventProductService.updateCategory(categoryRequestDto);
+        return new ResponseEntity(responseDto, HttpStatus.OK);
     }
 }

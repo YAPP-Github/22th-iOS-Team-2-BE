@@ -14,7 +14,7 @@ public enum Sorted implements Filter {
     LATEST(1,
             "최신순",
             null,
-            Sort.by("updatedTime").descending().and(Sort.by("_id").ascending()),
+            Sort.by("createdDate").descending().and(Sort.by("_id").ascending()),
             Comparator.comparing(BaseProduct::getCreatedDate).reversed().thenComparing(BaseProduct::getId)),
     VIEW(2,
             "조회순",

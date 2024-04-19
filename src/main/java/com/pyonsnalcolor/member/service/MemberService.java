@@ -2,6 +2,7 @@ package com.pyonsnalcolor.member.service;
 
 import com.pyonsnalcolor.exception.PyonsnalcolorAuthException;
 import com.pyonsnalcolor.exception.PyonsnalcolorProductException;
+import com.pyonsnalcolor.member.GuestValidator;
 import com.pyonsnalcolor.member.dto.FavoriteRequestDto;
 import com.pyonsnalcolor.member.dto.MemberInfoResponseDto;
 import com.pyonsnalcolor.member.dto.NicknameRequestDto;

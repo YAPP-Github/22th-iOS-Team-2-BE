@@ -62,4 +62,11 @@ public class AuthController {
         LoginResponseDto loginResponseDto = authService.join(oAuthType, email);
         return new ResponseEntity(loginResponseDto, HttpStatus.OK);
     }
+
+    @Operation(summary = "게스트 로그인", description = "둘러보기 버튼 누를 시, 게스트용 토큰을 반환합니다.")
+    @PostMapping("/guest/login")
+    public ResponseEntity<LoginResponseDto> guestLogin() {
+        LoginResponseDto loginResponseDto = authService.guestLogin();
+        return new ResponseEntity(loginResponseDto, HttpStatus.OK);
+    }
 }

@@ -1,5 +1,6 @@
 package com.pyonsnalcolor.member.security;
 
+import com.pyonsnalcolor.member.GuestValidator;
 import com.pyonsnalcolor.member.RedisUtil;
 import com.pyonsnalcolor.exception.PyonsnalcolorAuthException;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +41,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private RedisUtil redisUtil;
 
+    @Autowired
+    private GuestValidator guestValidator;
+
     private String OAUTH_ID = "oAuthId";
 
     @Override
@@ -53,9 +57,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             saveAuthenticationIfValidate(accessToken);
 
         } catch (Exception e) {
+            log.info("JwtAuthenticationFilter doFilterInternal() ");
             request.setAttribute("exception", e);
         }
-
         filterChain.doFilter(request, response);
     }
 

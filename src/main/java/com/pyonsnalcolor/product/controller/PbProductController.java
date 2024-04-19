@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+@Slf4j
 @Tag(name = "PB 상품 api")
 @RestController
 @RequiredArgsConstructor
@@ -37,6 +39,7 @@ public class PbProductController {
             @RequestBody ProductFilterRequestDto productFilterRequestDto,
             @Parameter(hidden = true) @AuthMemberId Long memberId
     ) {
+        log.info("PB 상품 필터 조회 memberId : {}", memberId);
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Page<ProductResponseDto> products = pbProductService.getPagedProductsByFilter(
                 pageable, storeType, productFilterRequestDto);

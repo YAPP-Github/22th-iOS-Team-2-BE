@@ -46,6 +46,11 @@ public class AdminController {
                 .body(new String(jsonData));
     }
 
+    @GetMapping("/")
+    public ResponseEntity healthCheck() {
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
     // ios 테스트용
     @GetMapping("/fcm/test")
     public ResponseEntity fcmTest(DeviceTokenRequestDto deviceTokenRequestDto) throws ExecutionException, InterruptedException {
